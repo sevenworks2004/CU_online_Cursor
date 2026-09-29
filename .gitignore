@@ -1,5 +1,10 @@
-TheFinalsDropCashout/bin/
-TheFinalsDropCashout/bin/*
+
+lib
+/lib
+lib/**
+./lib/**
+lib\KrokoshaCasualtiesMP.dll
+KrokoshaCasualtiesMP.dll
 
 .vscode
 .vscode/*
@@ -10,11 +15,7 @@ TheFinalsDropCashout/bin/*
 
 # dotenv files
 .env
-lib
-lib/**
-./lib/**
-lib\KrokoshaCasualtiesMP.dll
-KrokoshaCasualtiesMP.dll
+
 
 # User-specific files
 *.rsuser
@@ -491,5 +492,4 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 
-
-
+lib/KrokoshaCasualtiesMP.dll

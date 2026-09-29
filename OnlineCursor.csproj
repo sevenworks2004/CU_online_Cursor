@@ -22,8 +22,7 @@
     <EmbeddedResource Include="assets/cursor/alternative.png" />
     <EmbeddedResource Include="assets/cursor/link.png" />
     <EmbeddedResource Include="assets/cursor/text_also_can_be_alternative.png" />
-    <EmbeddedResource Include="assets/cursor/link2_or_alternative3.png
-    " />
+    <EmbeddedResource Include="assets/cursor/link2_or_alternative3.png" />
 
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
@@ -52,10 +51,10 @@
       <HintPath>lib/CUCoreLib.dll</HintPath>
     </Reference>
 
-    <Reference Include="LiteNetLib">
+    <!-- <Reference Include="LiteNetLib">
       <HintPath>lib\LiteNetLib.dll</HintPath>
       <Private>false</Private>
-    </Reference>
+    </Reference> -->
 
     <Reference Include="KrokoshaCasualtiesMP">
       <HintPath>lib\KrokoshaCasualtiesMP.dll</HintPath>
