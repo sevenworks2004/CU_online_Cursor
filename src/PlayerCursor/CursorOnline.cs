@@ -11,6 +11,7 @@ public class OnlineCursorProcess : MonoBehaviour
 {
     private static GameObject gameObjectProcessor;
     public static bool isIgnorePVPInvsableCursor = false; // :)
+    public bool keyVisable = true;
     public static void init()
     {
         SceneManager.activeSceneChanged += (Scene oldScene, Scene newScene) =>
@@ -39,6 +40,7 @@ public class OnlineCursorProcess : MonoBehaviour
     void LateUpdate()
     {
         if (!Util.IsWorldGenerated()) return;
+        if (Input.GetKeyDown(KeyCode.F2)) keyVisable = !keyVisable;
         foreach (var plrBody in NetBody.all_instances)
         {
 #if DEBUG
@@ -52,7 +54,7 @@ public class OnlineCursorProcess : MonoBehaviour
                 plrBody.body.gameObject.AddComponent<OnlineCursorUi>();
             }
 #if DEBUG
-            if (isIgnorePVPInvsableCursor)
+            if (isIgnorePVPInvsableCursor && keyVisable)
             {
                 if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = true;
                 continue;
@@ -69,6 +71,10 @@ public class OnlineCursorProcess : MonoBehaviour
 #endif
             else
             {
+                if (!keyVisable)
+                {
+                    onlineCursorUi.isVisiableCurssor = false;
+                }
                 if (KrokoshaScavMultiplayer.rules.PVP && KrokoshaScavMultiplayer.rules.Teams)
                 {
                     if (plrBody.player.playerColor == NetPlayer.LOCAL_PLAYER.playerColor)
@@ -86,6 +92,7 @@ public class OnlineCursorProcess : MonoBehaviour
                 }
 
             }
+
         }
     }
 }
@@ -104,7 +111,6 @@ public class OnlineCursorUi : MonoBehaviour
     private SpriteRenderer cursorRender;
     private Color24 colorPlayer;
     public bool isVisiableCurssor = true;
-    // private GameObject objDescript;
 
     void Start()
     {
@@ -161,8 +167,6 @@ public class OnlineCursorUi : MonoBehaviour
         if (!isVisiableCurssor)
         {
             cursorRender.sprite = null;
-            // if (objDescript != null) Destroy(objDescript);
-
             return;
         }
 
@@ -176,7 +180,6 @@ public class OnlineCursorUi : MonoBehaviour
         if (cols.Length == 0)
         {
             cursorRender.sprite = cursorNormalSprite;
-            // if (objDescript != null) Destroy(objDescript);
         }
         foreach (var col in cols)
         {
@@ -224,148 +227,5 @@ public class OnlineCursorUi : MonoBehaviour
 
         if (netPlayer == null) return;
 
-        // if (colorPlayer != netPlayer.playerColor)
-        // {
-        //     colorPlayer = netPlayer.playerColor;
-        //     setColorCurssor();
-        // }
-
     }
-    // public static GameObject Descriptions(Transform transform,string title, string descriptions)
-    // {
-    //     var mainDescriptions = new GameObject("mainDescriptions", [typeof(RectTransform)]);
-    //     var rectMainDescriptions = mainDescriptions.GetComponent<RectTransform>();
-    //     rectMainDescriptions.sizeDelta = new Vector2(300f, 300f);
-
-    //     var bgObj = new GameObject("background", [typeof(RectTransform)]);
-    //     bgObj.transform.SetParent(mainDescriptions.transform);
-
-    //     var rectBackgound = bgObj.GetComponent<RectTransform>();
-    //     rectBackgound.anchorMin = Vector2.zero;
-    //     rectBackgound.anchorMax = Vector2.one;
-    //     rectBackgound.offsetMin = Vector2.zero;
-    //     rectBackgound.offsetMax = Vector2.zero;
-
-    //     var bgImage = bgObj.AddComponent<Image>();
-    //     bgImage.color = new Color(1f, 0f, 0f, 0.0f);
-
-
-
-    //     return mainDescriptions;
-    // }
-    // void setColorCurssor()
-    // {
-    //     Texture2D texture = cursorRender.sprite.texture;
-
-    //     Texture2D newTexture = new Texture2D(
-    //         texture.width,
-    //         texture.height,
-    //         TextureFormat.RGBA32,
-    //         false
-    //     );
-
-    //     Color[] pixels = texture.GetPixels();
-    //     Color targetColor = new Color(colorPlayer.r / 255f, colorPlayer.g / 255f, colorPlayer.b / 255f);
-
-    //     for (int i = 0; i < pixels.Length; i++)
-    //     {
-    //         Color pixel = pixels[i];
-
-    //         // Если пиксель не белый (или близок к белому) и достаточно темный (черный / контур)
-    //         if (!(pixel.r > 0.9f && pixel.g > 0.9f && pixel.b > 0.9f) &&
-    //             pixel.r < 0.2f &&
-    //             pixel.g < 0.2f &&
-    //             pixel.b < 0.2f)
-    //         {
-    //             pixels[i] = new Color(targetColor.r, targetColor.g, targetColor.b, pixel.a);
-    //         }
-    //     }
-
-    //     newTexture.SetPixels(pixels);
-    //     newTexture.Apply();
-
-    //     Sprite oldSprite = cursorRender.sprite;
-
-    //     Sprite newSprite = Sprite.Create(
-    //         newTexture,
-    //         oldSprite.rect,
-    //         oldSprite.pivot / oldSprite.rect.size,
-    //         oldSprite.pixelsPerUnit
-    //     );
-
-    //     cursorRender.sprite = newSprite;
-    // }
 }
-// public static class RemoteCursorDescription
-// {
-//     public static GameObject Create(Transform parent, string title, string description)
-//     {
-//         // --- Корневой объект ---
-//         var root = new GameObject("remoteCursorDescription");
-
-//         // RectTransform вместо обычного Transform
-//         var rootRect = root.AddComponent<RectTransform>();
-//         rootRect.sizeDelta = new Vector2(240f, 100f); // ширина x высота
-//         rootRect.pivot = new Vector2(0.5f, 1f);       // точка привязки сверху
-
-//         if (parent != null)
-//         {
-//             root.transform.SetParent(parent, false);
-//             rootRect.localPosition = Vector3.zero;
-//         }
-
-//         // --- Фон (чёрный полупрозрачный) ---
-//         var bg = new GameObject("Background");
-//         bg.transform.SetParent(root.transform, false);
-
-//         var bgRect = bg.AddComponent<RectTransform>();
-//         bgRect.anchorMin = Vector2.zero;
-//         bgRect.anchorMax = Vector2.one;
-//         bgRect.offsetMin = Vector2.zero;
-//         bgRect.offsetMax = Vector2.zero;
-
-//         var bgImage = bg.AddComponent<Image>();
-//         bgImage.color = new Color(1f, 0f, 0f, 0.6f); // чёрный, 60% непрозрачности
-
-//         // --- Title ---
-//         var titleGO = CreateText(root.transform, "Title", title, 16, FontStyle.Bold);
-//         var titleRect = titleGO.GetComponent<RectTransform>();
-//         titleRect.anchorMin = new Vector2(0f, 1f);
-//         titleRect.anchorMax = new Vector2(1f, 1f);
-//         titleRect.pivot = new Vector2(0.5f, 1f);
-//         titleRect.offsetMin = new Vector2(10f, -30f); // отступ слева
-//         titleRect.offsetMax = new Vector2(-10f, -8f); // отступ справа и сверху
-
-//         // --- Description ---
-//         var descGO = CreateText(root.transform, "Description", description, 13, FontStyle.Normal);
-//         var descRect = descGO.GetComponent<RectTransform>();
-//         descRect.anchorMin = new Vector2(0f, 0f);
-//         descRect.anchorMax = new Vector2(1f, 1f);
-//         descRect.pivot = new Vector2(0.5f, 1f);
-//         descRect.offsetMin = new Vector2(10f, 8f);
-//         descRect.offsetMax = new Vector2(-10f, -35f);
-
-//         return root;
-//     }
-
-//     private static GameObject CreateText(Transform parent, string name, string content, int fontSize, FontStyle style)
-//     {
-//         var go = new GameObject(name);
-//         go.transform.SetParent(parent, false);
-
-//         go.AddComponent<RectTransform>();
-
-//         var text = go.AddComponent<Text>();
-//         text.text = content;
-//         // text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-//         text.fontSize = fontSize;
-//         text.fontStyle = style;
-//         text.color = Color.white;
-//         text.alignment = TextAnchor.UpperLeft;
-//         text.horizontalOverflow = HorizontalWrapMode.Wrap;
-//         text.verticalOverflow = VerticalWrapMode.Overflow;
-//         text.raycastTarget = false;
-
-//         return go;
-//     }
-// }
