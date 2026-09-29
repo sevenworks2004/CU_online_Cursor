@@ -1,24 +1,24 @@
 ﻿# MultiPlayerCursor
 
-Мод для **Casualties Unknown**, который показывает в игровом мире курсоры других участников сетевой сессии. Это помогает видеть, куда смотрят и на что указывают союзники.
+A mod for **Casualties Unknown** that displays the in-world cursors of other players in a multiplayer session. This helps you see where your teammates are looking and pointing.
 
-## Возможности
+## Features
 
-- Отображает курсор каждого другого подключённого игрока в сетевой игре.
-- Скрывает курсор игрока, если тот свернул игру или погиб.
-- В PvP без команд скрывает курсоры противников; в командном PvP отображает курсоры игроков своей команды.
-- Автоматически создаёт интерфейс курсоров после подключения сессия и вовремя игры.
+- Displays a cursor for every other player connected to the multiplayer session.
+- Hides a player's cursor if they have tabbed out or died.
+- In non-team PvP, hides opponents' cursors; in team PvP, displays cursors only for players on your team.
+- Automatically creates cursors after joining a session and during gameplay.
 
-## Требования
+## Requirements
 
-- Последния версия BepInEx
-- [Многопользовательский режим](https://github.com/creaturefeaturelarry/casualties-together)
+- The latest version of BepInEx
+- [Multiplayer mode](https://github.com/creaturefeaturelarry/casualties-together)
 
-## Установка
+## Installation
 
-1. Установите BepInEx для Casualties Unknown и хотя бы раз запустите игру.
-2. Убедитесь, что установлен мод [Многопользовательский режим](https://github.com/creaturefeaturelarry/casualties-together).
-3. Скопируйте `OnlineCursor.dll` в папку `BepInEx/plugins/OnlineCursor` внутри каталога игры.
-4. Запустите или подключитесь к сетевой сессии.
+1. Install BepInEx for Casualties Unknown and launch the game once.
+2. Make sure the [Multiplayer mode](https://github.com/creaturefeaturelarry/casualties-together) mod is installed.
+3. Copy `OnlineCursor.dll` into the `BepInEx/plugins/OnlineCursor` folder in the game directory.
+4. Start or join a multiplayer session.
 
-Мод работает только при запущенной сетевой системе.
+The mod works only while the multiplayer system is running.
