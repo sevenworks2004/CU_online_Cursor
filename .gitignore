@@ -10,7 +10,11 @@ TheFinalsDropCashout/bin/*
 
 # dotenv files
 .env
-
+lib
+lib/**
+./lib/**
+lib\KrokoshaCasualtiesMP.dll
+KrokoshaCasualtiesMP.dll
 
 # User-specific files
 *.rsuser
