@@ -226,6 +226,5 @@ public class OnlineCursorUi : MonoBehaviour
 #endif
 
         if (netPlayer == null) return;
-
     }
 }
