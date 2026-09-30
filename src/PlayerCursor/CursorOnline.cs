@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using CUCoreLib.Helpers;
 using KrokoshaCasualtiesMP;
 using KrokoshaCasualtiesUtils;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -107,7 +108,8 @@ public class OnlineCursorUi : MonoBehaviour
     private SpriteRenderer cursorRender;
     private Color24 colorPlayer;
     public bool isVisiableCurssor = true;
-    private bool enable = true;
+    private GameObject mainDescriptionsCanvast;
+    private TextMeshProUGUI hoverTextTitle;
 
     void Start()
     {
@@ -140,7 +142,7 @@ public class OnlineCursorUi : MonoBehaviour
         mainGameObject.layer = 0;
 
         cursorObject = new GameObject("Curssor");
-        cursorObject.transform.localScale = new Vector3(20f, 20f);
+        // cursorObject.transform.localScale = new Vector3(20f, 20f);
         cursorObject.transform.SetParent(mainGameObject.transform);
 
         cursorRender = cursorObject.AddComponent<SpriteRenderer>();
@@ -148,9 +150,55 @@ public class OnlineCursorUi : MonoBehaviour
         cursorRender.transform.localScale = new Vector2(0.6f, 0.6f);
         cursorRender.sortingOrder = 32767;
         cursorRender.sortingLayerName = "Overlay";
+
+        // Descriptions
+        mainDescriptionsCanvast = new GameObject(
+            "main_Descriptions",
+            [
+                typeof(RectTransform),
+                typeof(Canvas),
+                typeof(ContentSizeFitter)
+            ]
+        );
+        mainDescriptionsCanvast.transform.SetParent(cursorObject.transform, false);
+        mainDescriptionsCanvast.transform.localPosition = Vector2.zero;
+
+        var canvas = mainDescriptionsCanvast.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 32767;
+
+
+        var rectDescriptions = mainDescriptionsCanvast.GetComponent<RectTransform>();
+        rectDescriptions.sizeDelta = new Vector2(5, 5);
+
+        GameObject background = new GameObject("background", [typeof(Image), typeof(RectTransform), typeof(ContentSizeFitter), typeof(VerticalLayoutGroup)]);
+        background.transform.SetParent(mainDescriptionsCanvast.transform);
+
+        var img = background.GetComponent<Image>();
+        img.color = new Color(0f, 0f, 0f);
+
+        var rec = background.GetComponent<RectTransform>();
+        rec.sizeDelta = new Vector2(5, 5);
+
+        var layout = background.GetComponent<VerticalLayoutGroup>();
+
+        var conSizeFi = background.GetComponent<ContentSizeFitter>();
+        conSizeFi.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        conSizeFi.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        GameObject textObject = new GameObject("text", [typeof(TextMeshProUGUI)]);
+        textObject.transform.SetParent(background.transform);
+
+        hoverTextTitle = textObject.GetComponent<TextMeshProUGUI>();
+        // hoverTextTitle.text = "Cashout Table Info";
+        hoverTextTitle.fontSize = 0.7f;
+
+        background.transform.localPosition = new Vector3(5f, -1.0f);
     }
     void Update()
     {
+
 #if DEBUG
         if (KrokoshaScavMultiplayer.network_system_is_running)
         {
@@ -164,11 +212,14 @@ public class OnlineCursorUi : MonoBehaviour
             body = plr.body;
         }
 #else
-        if (!NetPlayer.TryGetPlayerFromClientId(netPlayer.clientId,out NetPlayer _))
-        {
-            Destroy(gameObject);
-            return;
-        }
+            var plr = NetPlayer.GetNetPlayerFromBody(body);
+            if (plr == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            netPlayer = plr;
+            body = plr.body;
 #endif
 
     }
@@ -190,11 +241,14 @@ public class OnlineCursorUi : MonoBehaviour
         if (cols.Length == 0)
         {
             cursorRender.sprite = cursorNormalSprite;
+            hoverTextTitle.text = null;
         }
         foreach (var col in cols)
         {
             if (col.TryGetComponent<BuildingEntity>(out BuildingEntity building))
             {
+                // Console.WriteLine($"Building : {building.fullNameDisplay} Descriptions : {building.description}");
+                hoverTextTitle.text = building.fullNameDisplay;
                 if (building.TryGetComponent<UsableObject>(out UsableObject usableObject))
                 {
                     var posBody = body.transform.position;
@@ -212,20 +266,23 @@ public class OnlineCursorUi : MonoBehaviour
                 }
                 else
                 {
-                    cursorRender.sprite = cursorLinkSprite;
+                    cursorRender.sprite = cursorAlternativeSprite;
                 }
             }
-            else if (col.TryGetComponent<Body>(out Body _))
+            else if (col.TryGetComponent<Body>(out Body b))
             {
                 cursorRender.sprite = cursorLinkSprite;
+                hoverTextTitle.text = b.name;
             }
             else if (col.TryGetComponent<Item>(out Item item))
             {
                 cursorRender.sprite = cursorLink2OrAlternative3Sprite;
             }
-            else if (col.name == "Chunk")
+            else if (col.TryGetComponent<ChunkScript>(out ChunkScript chunk))
             {
-                cursorRender.sprite = cursorAlternativeSprite;
+                var posBlock = WorldGeneration.world.WorldToBlockPos(targetLookPos);
+                BlockInfo blockInfo = WorldGeneration.world.GetBlockInfo(WorldGeneration.world.worldBlocks[posBlock.x,posBlock.y]);
+                hoverTextTitle.text = blockInfo.name;
             }
             else
             {
@@ -239,7 +296,6 @@ public class OnlineCursorUi : MonoBehaviour
 #endif
         if (netPlayer == null) return;
     }
-    
     void OnDestroy()
     {
         Destroy(mainGameObject);
