@@ -194,6 +194,11 @@ public class OnlineCursorUi : MonoBehaviour
         // hoverTextTitle.text = "Cashout Table Info";
         hoverTextTitle.fontSize = 0.7f;
 
+        var rectBackground = background.GetComponent<RectTransform>();
+        rectBackground.anchorMax = new Vector2(0.5f, 1f);
+        rectBackground.anchorMin = new Vector2(0.5f, 1f);
+        rectBackground.pivot = new Vector2(0.5f, 1f);
+
         background.transform.localPosition = new Vector3(5f, -1.0f);
     }
     void Update()
@@ -247,8 +252,7 @@ public class OnlineCursorUi : MonoBehaviour
         {
             if (col.TryGetComponent<BuildingEntity>(out BuildingEntity building))
             {
-                // Console.WriteLine($"Building : {building.fullNameDisplay} Descriptions : {building.description}");
-                hoverTextTitle.text = building.fullNameDisplay;
+                Descriptions(building.fullNameDisplay);
                 if (building.TryGetComponent<UsableObject>(out UsableObject usableObject))
                 {
                     var posBody = body.transform.position;
@@ -272,21 +276,27 @@ public class OnlineCursorUi : MonoBehaviour
             else if (col.TryGetComponent<Body>(out Body b))
             {
                 cursorRender.sprite = cursorLinkSprite;
-                hoverTextTitle.text = b.name;
+                var p = NetPlayer.GetNetPlayerFromBody(b);
+                if (p == null) continue;
+                Descriptions(p.playername);
             }
             else if (col.TryGetComponent<Item>(out Item item))
             {
                 cursorRender.sprite = cursorLink2OrAlternative3Sprite;
+                Descriptions(item.fullName);
             }
             else if (col.TryGetComponent<ChunkScript>(out ChunkScript chunk))
             {
                 var posBlock = WorldGeneration.world.WorldToBlockPos(targetLookPos);
-                BlockInfo blockInfo = WorldGeneration.world.GetBlockInfo(WorldGeneration.world.worldBlocks[posBlock.x,posBlock.y]);
-                hoverTextTitle.text = blockInfo.name;
+                BlockInfo blockInfo = WorldGeneration.world.GetBlockInfo(WorldGeneration.world.worldBlocks[posBlock.x, posBlock.y]);
+                Descriptions(blockInfo.name);
+                cursorRender.sprite = cursorAlternativeSprite;
             }
             else
             {
+#if DEBUG
                 Console.WriteLine(col.GetType().FullName);
+#endif
                 cursorRender.sprite = cursorNormalSprite;
             }
         }
@@ -295,6 +305,10 @@ public class OnlineCursorUi : MonoBehaviour
         if (!KrokoshaScavMultiplayer.network_system_is_running) return;
 #endif
         if (netPlayer == null) return;
+    }
+    void Descriptions(string title, string descriptions = null)
+    {
+        hoverTextTitle.text = title;
     }
     void OnDestroy()
     {
