@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CUCoreLib.Helpers;
 using KrokoshaCasualtiesMP;
 using KrokoshaCasualtiesUtils;
@@ -11,7 +12,7 @@ public class OnlineCursorProcess : MonoBehaviour
 {
     private static GameObject gameObjectProcessor;
     public static bool isIgnorePVPInvsableCursor = false; // :)
-    public bool keyVisable = true;
+    public bool visable = true;
     public static void init()
     {
         SceneManager.activeSceneChanged += (Scene oldScene, Scene newScene) =>
@@ -22,6 +23,7 @@ public class OnlineCursorProcess : MonoBehaviour
                 {
                     gameObjectProcessor = new GameObject("CurssorUi_Processor");
                     gameObjectProcessor.AddComponent<OnlineCursorProcess>();
+
                 }
 #if DEBUG
                 else
@@ -40,7 +42,10 @@ public class OnlineCursorProcess : MonoBehaviour
     void LateUpdate()
     {
         if (!Util.IsWorldGenerated()) return;
-        if (Input.GetKeyDown(KeyCode.F2)) keyVisable = !keyVisable;
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            visable = !visable;
+        }
         foreach (var plrBody in NetBody.all_instances)
         {
 #if DEBUG
@@ -52,47 +57,38 @@ public class OnlineCursorProcess : MonoBehaviour
             if (!plrBody.body.TryGetComponent<OnlineCursorUi>(out OnlineCursorUi onlineCursorUi))
             {
                 plrBody.body.gameObject.AddComponent<OnlineCursorUi>();
-            }
-#if DEBUG
-            if (isIgnorePVPInvsableCursor && keyVisable)
-            {
-                if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = true;
                 continue;
             }
-            if (!plrBody.body.alive)
+            if (isIgnorePVPInvsableCursor && visable)
             {
-                if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = false;
+                onlineCursorUi.isVisiableCurssor = false;
             }
-#else
-            if (plrBody.player.is_alttab || !plrBody.body.alive)
+            else if (plrBody.player.is_alttab || !plrBody.body.alive)
             {
-                if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = false;
+                onlineCursorUi.isVisiableCurssor = false;
             }
-#endif
             else
             {
-                if (!keyVisable)
-                {
-                    onlineCursorUi.isVisiableCurssor = false;
-                }
                 if (KrokoshaScavMultiplayer.rules.PVP && KrokoshaScavMultiplayer.rules.Teams)
                 {
                     if (plrBody.player.playerColor == NetPlayer.LOCAL_PLAYER.playerColor)
                     {
-                        if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = true;
+                        onlineCursorUi.isVisiableCurssor = true;
                     }
                 }
                 else if (KrokoshaScavMultiplayer.rules.PVP && !KrokoshaScavMultiplayer.rules.Teams)
                 {
-                    if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = false;
+                    onlineCursorUi.isVisiableCurssor = false;
                 }
                 else
                 {
-                    if (onlineCursorUi != null) onlineCursorUi.isVisiableCurssor = true;
+                    onlineCursorUi.isVisiableCurssor = true;
                 }
-
             }
-
+            if (!visable)
+            {
+                onlineCursorUi.isVisiableCurssor = false;
+            }
         }
     }
 }
@@ -104,13 +100,14 @@ public class OnlineCursorUi : MonoBehaviour
     private static Sprite cursorAlternativeSprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.alternative.png");
     private static Sprite cursorLink2OrAlternative3Sprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.link2_or_alternative3.png");
     private static Sprite cursorTextAlsoCanBeAlternativeSprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.text_also_can_be_alternative.png");
-    private Body body;
-    private NetPlayer netPlayer;
+    public Body body;
+    public NetPlayer netPlayer;
     private GameObject mainGameObject;
     private GameObject cursorObject;
     private SpriteRenderer cursorRender;
     private Color24 colorPlayer;
     public bool isVisiableCurssor = true;
+    private bool enable = true;
 
     void Start()
     {
@@ -141,7 +138,6 @@ public class OnlineCursorUi : MonoBehaviour
 #endif
         mainGameObject = new GameObject("target_Body");
         mainGameObject.layer = 0;
-        // mainGameObject.transform.localPosition = Vector3.zero;
 
         cursorObject = new GameObject("Curssor");
         cursorObject.transform.localScale = new Vector3(20f, 20f);
@@ -149,21 +145,35 @@ public class OnlineCursorUi : MonoBehaviour
 
         cursorRender = cursorObject.AddComponent<SpriteRenderer>();
         cursorRender.sprite = cursorNormalSprite;
-        // spriteRenderer.transform.localPosition = new Vector2(0.5f,-0.5f);
         cursorRender.transform.localScale = new Vector2(0.6f, 0.6f);
         cursorRender.sortingOrder = 32767;
         cursorRender.sortingLayerName = "Overlay";
-
-
     }
-
     void Update()
     {
-        if (body == null)
+#if DEBUG
+        if (KrokoshaScavMultiplayer.network_system_is_running)
+        {
+            var plr = NetPlayer.GetNetPlayerFromBody(body);
+            if (plr == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            netPlayer = plr;
+            body = plr.body;
+        }
+#else
+        if (!NetPlayer.TryGetPlayerFromClientId(netPlayer.clientId,out NetPlayer _))
         {
             Destroy(gameObject);
             return;
         }
+#endif
+
+    }
+    void LateUpdate()
+    {
         if (!isVisiableCurssor)
         {
             cursorRender.sprite = null;
@@ -190,8 +200,6 @@ public class OnlineCursorUi : MonoBehaviour
                     var posBody = body.transform.position;
                     var usablePos = usableObject.transform.position;
                     var limitDist = 10f * usableObject.rangeMultiplier;
-                    // if (objDescript == null) objDescript = Descriptions(cursorObject.transform, building.fullNameDisplay, building.description);
-
                     var dist = Vector2.Distance(posBody, usablePos);
                     if (dist < limitDist)
                     {
@@ -215,8 +223,13 @@ public class OnlineCursorUi : MonoBehaviour
             {
                 cursorRender.sprite = cursorLink2OrAlternative3Sprite;
             }
+            else if (col.name == "Chunk")
+            {
+                cursorRender.sprite = cursorAlternativeSprite;
+            }
             else
             {
+                Console.WriteLine(col.GetType().FullName);
                 cursorRender.sprite = cursorNormalSprite;
             }
         }
@@ -224,7 +237,13 @@ public class OnlineCursorUi : MonoBehaviour
 #if DEBUG
         if (!KrokoshaScavMultiplayer.network_system_is_running) return;
 #endif
-
         if (netPlayer == null) return;
+    }
+    
+    void OnDestroy()
+    {
+        Destroy(mainGameObject);
+        Destroy(cursorObject);
+        Destroy(cursorRender);
     }
 }
