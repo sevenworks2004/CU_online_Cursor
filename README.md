@@ -10,6 +10,8 @@ A mod for **Casualties Unknown** that displays the in-world cursors of other pla
 - Hides a player's cursor if they have tabbed out or died.
 - In non-team PvP, hides opponents' cursors; in team PvP, displays cursors only for players on your team.
 - Automatically creates cursors after joining a session and during gameplay.
+- Shows description boxes of objects players are hovering on.
+- Has a hotkey to disable the mod (F2).
 
 ## Requirements
 
