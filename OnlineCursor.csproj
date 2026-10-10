@@ -51,13 +51,13 @@
       <HintPath>lib/CUCoreLib.dll</HintPath>
     </Reference>
 
-    <!-- <Reference Include="LiteNetLib">
+    <Reference Include="LiteNetLib">
       <HintPath>lib\LiteNetLib.dll</HintPath>
       <Private>false</Private>
-    </Reference> -->
+    </Reference>
 
-    <Reference Include="KrokoshaCasualtiesMP">
-      <HintPath>lib\KrokoshaCasualtiesMP.dll</HintPath>
+    <Reference Include="CasualtiesMP">
+      <HintPath>lib\CasualtiesMP.dll</HintPath>
       <Private>false</Private>
     </Reference>
 
