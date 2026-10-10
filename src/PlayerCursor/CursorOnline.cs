@@ -191,7 +191,6 @@ public class OnlineCursorUi : MonoBehaviour
         textObject.transform.SetParent(background.transform);
 
         hoverTextTitle = textObject.GetComponent<TextMeshProUGUI>();
-        // hoverTextTitle.text = "Cashout Table Info";
         hoverTextTitle.fontSize = 0.7f;
 
         var rectBackground = background.GetComponent<RectTransform>();
