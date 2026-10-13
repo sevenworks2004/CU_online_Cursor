@@ -6,23 +6,27 @@ A mod for **Casualties Unknown** that displays the in-world cursors of other pla
 
 ## Features
 
-- Displays a cursor for every other player connected to the multiplayer session.
+- Client-side (Only those who have the mod see the cursor)
+- Displays the in-world cursor of other players.
 - Hides a player's cursor if they have tabbed out or died.
-- In non-team PvP, hides opponents' cursors; in team PvP, displays cursors only for players on your team.
-- Automatically creates cursors after joining a session and during gameplay.
-- Shows description boxes of objects players are hovering on.
+- In PvP, opponent cursors are hidden.
+- In team PvP, only teammates' cursors are displayed.
+- Shows the name of every player's cursor
 - Has a hotkey to disable the mod (F2).
 
 ## Requirements
 
 - The latest version of BepInEx
 - [Multiplayer mode](https://github.com/creaturefeaturelarry/casualties-together)
+- [CUCore](https://github.com/jimmyking9999999/CUCoreLib)
 
 ## Installation
 
-1. Install BepInEx for Casualties Unknown and launch the game once.
-2. Make sure the [Multiplayer mode](https://github.com/creaturefeaturelarry/casualties-together) mod is installed.
-3. Copy `OnlineCursor.dll` into the `BepInEx/plugins/OnlineCursor` folder in the game directory.
-4. Start or join a multiplayer session.
+1. Install BepInEx for Casualties: Unknown.
+2. Launch the game once with BepInEx installed.
+3. Install Casualties Together / Multiplayer mode.
+4. Download the MultiPlayerCursor archive.
+5. Extract the archive into your BepInEx plugins folder.
+6. Start the game and join or host a multiplayer session.
 
-The mod works only while the multiplayer system is running.
+After installation, the file should be located at: `BepInEx/plugins/OnlineCursor/OnlineCursor.dll`
