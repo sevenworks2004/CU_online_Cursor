@@ -1,6 +1,6 @@
 # MultiPlayerCursor
 
-![MultiPlayerCursor preview](images/image.jpg)
+![MultiPlayerCursor preview](images/image.png)
 
 A mod for **Casualties Unknown** that displays the in-world cursors of other players in a multiplayer session. This helps you see where your teammates are looking and pointing.
 
