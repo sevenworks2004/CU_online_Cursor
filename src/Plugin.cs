@@ -11,7 +11,7 @@ namespace ModOnlineCursor
     {
         public const string ModGUID = "Seven.MultiPlayerCursor";
         public const string ModName = "MultiPlayerCursor";
-        public const string ModVersion = "0.0.9";
+        public const string ModVersion = "0.0.9.5";
         internal static new ManualLogSource Logger;
         private readonly Harmony _harmony = new(ModGUID);
         public static Plugin Instance { get; private set; } = null!;
@@ -19,16 +19,22 @@ namespace ModOnlineCursor
         void Awake()
         {
             Logger = base.Logger;
+            LoggerCursor.Logger = Logger;
             Instance = this;
+
 #if DEBUG
-            Console.WriteLine("Debug ==================================");
+            Logger.LogInfo("Online Cursor mode build Debug ==================================");
 #else
-            Console.WriteLine("Realase //////////////////");
+            Logger.LogInfo("Online Cursor mode build Realase //////////////////");
 #endif
 
             ConfigOnlineCursor.config(this.Config);
             OnlineCursorProcess.init();
             _harmony.PatchAll(typeof(Plugin).Assembly);
         }
+    }
+    public class LoggerCursor
+    {
+        internal static ManualLogSource Logger;
     }
 }

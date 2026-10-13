@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using CasualtiesTogetherUtils;
 using CUCoreLib.Helpers;
+using ModOnlineCursor;
 using TMPro;
 using Together;
 using UnityEngine;
@@ -16,6 +17,7 @@ public class OnlineCursorProcess : MonoBehaviour
     public static bool visable = true;
     public static void init()
     {
+        initalizerCursorSprite();
         SceneManager.activeSceneChanged += (Scene oldScene, Scene newScene) =>
         {
             if (newScene.name == "SampleScene")
@@ -38,6 +40,58 @@ public class OnlineCursorProcess : MonoBehaviour
                 if (gameObjectProcessor != null) Destroy(gameObjectProcessor);
             }
         };
+    }
+
+    public static void initalizerCursorSprite()
+    {
+        var cursors = PlayerCamera.main.cursors;
+        var textureNormalCursor = cursors[0];
+        var normalCursor = Sprite.Create(
+        textureNormalCursor,
+        new Rect(0, 0, textureNormalCursor.width, textureNormalCursor.height),
+        new Vector2(0.50f, 0.50f),
+        15f
+        );
+        OnlineCursorUi.cursorNormalSprite = normalCursor;
+
+        var texture_link2_or_alternative3 = cursors[1];
+        var cursor_link2_or_alternative3 = Sprite.Create(
+            texture_link2_or_alternative3,
+            new Rect(0, 0, texture_link2_or_alternative3.width, texture_link2_or_alternative3.height),
+            new Vector2(0.50f, 0.50f),
+            15f
+        );
+        OnlineCursorUi.cursorLink2OrAlternative3Sprite = cursor_link2_or_alternative3;
+
+
+        var texture_alternative = cursors[2];
+        var cursor_alternative = Sprite.Create(
+            texture_alternative,
+            new Rect(0, 0, texture_alternative.width, texture_alternative.height),
+            new Vector2(0.50f, 0.50f),
+            15f
+        );
+        OnlineCursorUi.cursorAlternativeSprite = cursor_alternative;
+
+
+        var texture_text_also_can_be_alternative = cursors[3];
+        var cursor_text_also_can_be_alternative = Sprite.Create(
+            texture_text_also_can_be_alternative,
+            new Rect(0, 0, texture_text_also_can_be_alternative.width, texture_text_also_can_be_alternative.height),
+            new Vector2(0.50f, 0.50f),
+            15f
+        );
+        OnlineCursorUi.cursorTextAlsoCanBeAlternativeSprite = cursor_text_also_can_be_alternative;
+
+        var texture_link = cursors[4];
+        var cursor_link = Sprite.Create(
+            texture_link,
+            new Rect(0, 0, texture_link.width, texture_link.height),
+            new Vector2(0.50f, 0.50f),
+            15f
+        );
+        OnlineCursorUi.cursorLinkSprite = cursor_link;
+        LoggerCursor.Logger.LogInfo("Games system cursor initialized");
     }
 
     void LateUpdate()
@@ -67,18 +121,20 @@ public class OnlineCursorProcess : MonoBehaviour
 
 public class OnlineCursorUi : MonoBehaviour
 {
-    private static Sprite cursorNormalSprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.normal.png");
-    private static Sprite cursorLinkSprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.link.png");
-    private static Sprite cursorAlternativeSprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.alternative.png");
-    private static Sprite cursorLink2OrAlternative3Sprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.link2_or_alternative3.png");
-    private static Sprite cursorTextAlsoCanBeAlternativeSprite = AssetLoader.LoadEmbeddedSprite("assets.cursor.text_also_can_be_alternative.png");
+    internal static Sprite cursorNormalSprite; // 0
+    internal static Sprite cursorLink2OrAlternative3Sprite; // 1
+    internal static Sprite cursorAlternativeSprite; // 2
+    internal static Sprite cursorTextAlsoCanBeAlternativeSprite; // 3
+    internal static Sprite cursorLinkSprite; // 4
     public Body body;
     public ScavPlayer scavPlayer;
     private GameObject mainGameObject;
     private GameObject cursorPositions;
-    private SpriteRenderer cursorRender;
     private Color24 plrColor;
     private Action updateUsernameAndColor;
+    private StatusCursor statusCursor;
+    private Action updateCursorStatus;
+
     void Awake()
     {
         mainGameObject = new GameObject("target_Body");
@@ -90,11 +146,36 @@ public class OnlineCursorUi : MonoBehaviour
         var cursorSprite = new GameObject("Cursor", [typeof(SpriteRenderer), typeof(RectTransform)]);
         cursorSprite.transform.SetParent(cursorPositions.transform);
 
-        cursorRender = cursorSprite.GetComponent<SpriteRenderer>();
+        // var texture = PlayerCamera.main.cursors;
+        // Sprite.Create()
+        var cursorRender = cursorSprite.GetComponent<SpriteRenderer>();
         cursorRender.sprite = cursorNormalSprite;
         cursorRender.transform.localScale = new Vector2(0.6f, 0.6f);
         cursorRender.sortingOrder = 32767;
         cursorRender.sortingLayerName = "Overlay";
+        updateCursorStatus = () =>
+        {
+            if (statusCursor == StatusCursor.cursorNormal)
+            {
+                cursorRender.sprite = cursorNormalSprite;
+            }
+            else if (statusCursor == StatusCursor.cursorAlternative)
+            {
+                cursorRender.sprite = cursorAlternativeSprite;
+            }
+            else if (statusCursor == StatusCursor.cursorLink)
+            {
+                cursorRender.sprite = cursorLinkSprite;
+            }
+            else if (statusCursor == StatusCursor.cursorLink2OrAlternative3)
+            {
+                cursorRender.sprite = cursorLink2OrAlternative3Sprite;
+            }
+            else if (statusCursor == StatusCursor.hide)
+            {
+                cursorRender.sprite = null;
+            }
+        };
 
         var rectSprite = cursorSprite.GetComponent<RectTransform>();
         rectSprite.localPosition = new Vector2(1.2f, -1.2f);
@@ -161,13 +242,11 @@ public class OnlineCursorUi : MonoBehaviour
         {
             if (body == null)
             {
-                Console.WriteLine("===============================\nError body null\n========================");
                 Destroy(this);
             }
             scavPlayer = ScavPlayer.GetPlayerFromBody(body);
             if (scavPlayer == null)
             {
-                Console.WriteLine("===============================\nError body null\n========================");
                 Destroy(this);
             }
             plrColor = scavPlayer.playerColor;
@@ -177,13 +256,11 @@ public class OnlineCursorUi : MonoBehaviour
 #else
         if (body == null)
         {
-            Console.WriteLine("===============================\nError body null\n========================");
             Destroy(this);
         }
         scavPlayer = ScavPlayer.GetPlayerFromBody(body);
         if (scavPlayer == null)
         {
-            Console.WriteLine("===============================\nError scavBody null\n========================");
             Destroy(this);
         }
         plrColor = scavPlayer.playerColor;
@@ -192,9 +269,9 @@ public class OnlineCursorUi : MonoBehaviour
 
 
     }
+
     void Update()
     {
-
 #if DEBUG
         if (Net.IsRunning)
         {
@@ -220,10 +297,75 @@ public class OnlineCursorUi : MonoBehaviour
     }
     void LateUpdate()
     {
+        statusCursor = StatusCursor.cursorNormal;
+#if DEBUG
+        if (Net.IsRunning)
+        {
+            if (scavPlayer == null)
+            {
+                Destroy(this);
+                return;
+            }
+
+            if (!OnlineCursorProcess.visable)
+            {
+                if (mainGameObject.activeSelf)
+                {
+                    mainGameObject.SetActive(false);
+                }
+                return;
+            }
+            else
+            {
+                if (!mainGameObject.activeSelf)
+                {
+                    mainGameObject.SetActive(true);
+                }
+            }
+            if (OnlineCursorProcess.isIgnorePVPInvsableCursor) { }
+            else if (Multiplayer.rules.PVP && Multiplayer.rules.Teams)
+            {
+                if (scavPlayer.playerColor != ScavPlayer.LocalPlayer.playerColor)
+                {
+                    statusCursor = StatusCursor.hide;
+                    updateCursorStatus();
+                    return;
+                }
+            }
+            else if (Multiplayer.rules.PVP && !Multiplayer.rules.Teams)
+            {
+                statusCursor = StatusCursor.hide;
+                updateCursorStatus();
+                return;
+            }
+            else if (scavPlayer.IsAltTab || scavPlayer.IsDead())
+            {
+                statusCursor = StatusCursor.hide;
+                updateCursorStatus();
+                return;
+            }
+        }
+#else
         if (scavPlayer == null)
         {
             Destroy(this);
             return;
+        }
+
+        if (!OnlineCursorProcess.visable)
+        {
+            if (mainGameObject.activeSelf)
+            {
+                mainGameObject.SetActive(false);
+            }
+            return;
+        }
+        else
+        {
+            if (!mainGameObject.activeSelf)
+            {
+                mainGameObject.SetActive(true);
+            }
         }
         if (OnlineCursorProcess.isIgnorePVPInvsableCursor) { }
         else if (Multiplayer.rules.PVP && Multiplayer.rules.Teams)
@@ -244,40 +386,29 @@ public class OnlineCursorUi : MonoBehaviour
             cursorRender.sprite = null;
             return;
         }
-
-        if (!OnlineCursorProcess.visable)
-        {
-            if (mainGameObject.activeSelf)
-            {
-                mainGameObject.SetActive(false);
-            }
-            return;
-        }
-        else
-        {
-            if (!mainGameObject.activeSelf)
-            {
-                mainGameObject.SetActive(true);
-            }
-        }
+#endif
 
         mainGameObject.transform.position = body.transform.position;
         var targetLookPos = body.targetLookPos;
         var bodyPos = gameObject.transform.position;
         var offset = targetLookPos - bodyPos;
         cursorPositions.transform.localPosition = new Vector3(offset.x, offset.y);
-
-        Collider2D[] cols = Physics2D.OverlapPointAll(targetLookPos);
-        if (cols.Length == 0)
+        Collider2D collider = Physics2D.OverlapPoint(targetLookPos, LayerMask.GetMask(["Item", "Ground", "Descriptor", "Limb", "Body"]));
+        // if (!collider)
+        // {
+        //     collider = Physics2D.OverlapPoint(targetLookPos, LayerMask.GetMask("Body"));
+        // }
+        if ((bool)collider)
         {
-            cursorRender.sprite = cursorNormalSprite;
-            // hoverTextTitle.text = null;
-        }
-        foreach (var col in cols)
-        {
-            if (col.TryGetComponent<BuildingEntity>(out BuildingEntity building))
+            if (collider.TryGetComponent<Item>(out Item item))
             {
-                Descriptions(building.fullNameDisplay);
+                statusCursor = StatusCursor.cursorLink2OrAlternative3;
+                LoggerCursor.Logger.LogDebug($"Hover item : {item.name}");
+
+            }
+            else if (collider.TryGetComponent<BuildingEntity>(out BuildingEntity building))
+            {
+                LoggerCursor.Logger.LogDebug($"Hover BuildingEntity : {building.name}");
                 if (building.TryGetComponent<UsableObject>(out UsableObject usableObject))
                 {
                     var posBody = body.transform.position;
@@ -286,45 +417,45 @@ public class OnlineCursorUi : MonoBehaviour
                     var dist = Vector2.Distance(posBody, usablePos);
                     if (dist < limitDist)
                     {
-                        cursorRender.sprite = cursorLinkSprite;
+                        // cursorRender.sprite = cursorLinkSprite;
+                        statusCursor = StatusCursor.cursorLink;
                     }
                     else
                     {
-                        cursorRender.sprite = cursorAlternativeSprite;
+                        // cursorRender.sprite = cursorAlternativeSprite;
+                        statusCursor = StatusCursor.cursorAlternative;
                     }
                 }
                 else
                 {
-                    cursorRender.sprite = cursorAlternativeSprite;
+                    // cursorRender.sprite = cursorAlternativeSprite;
+                    statusCursor = StatusCursor.cursorAlternative;
                 }
             }
-            else if (col.TryGetComponent<Body>(out Body b))
+            else if (collider.TryGetComponent<Body>(out Body body))
             {
-                cursorRender.sprite = cursorLinkSprite;
-                var p = ScavPlayer.GetPlayerFromBody(b);
-                if (p == null) continue;
-                Descriptions(p.playerName);
+                statusCursor = StatusCursor.cursorLink;
+                LoggerCursor.Logger.LogDebug($"Hover Body : {body.name}");
+
             }
-            else if (col.TryGetComponent<Item>(out Item item))
-            {
-                cursorRender.sprite = cursorLink2OrAlternative3Sprite;
-                Descriptions(item.fullName);
-            }
-            else if (col.TryGetComponent<ChunkScript>(out ChunkScript chunk))
+            else if (collider.TryGetComponent<ChunkScript>(out ChunkScript chunk))
             {
                 var posBlock = WorldGeneration.world.WorldToBlockPos(targetLookPos);
                 BlockInfo blockInfo = WorldGeneration.world.GetBlockInfo(WorldGeneration.world.worldBlocks[posBlock.x, posBlock.y]);
                 Descriptions(blockInfo.name);
-                cursorRender.sprite = cursorAlternativeSprite;
+                statusCursor = StatusCursor.cursorAlternative;
+                LoggerCursor.Logger.LogDebug($"Hover block : {blockInfo.name}");
+
             }
             else
             {
 #if DEBUG
-                Console.WriteLine(col.GetType().FullName);
+                LoggerCursor.Logger.LogDebug(collider.GetType().FullName);
 #endif
-                cursorRender.sprite = cursorNormalSprite;
+                statusCursor = StatusCursor.cursorNormal;
             }
         }
+        updateCursorStatus();
 #if DEBUG
         if (!Net.IsRunning) return;
         if (scavPlayer == null) return;
@@ -344,6 +475,16 @@ public class OnlineCursorUi : MonoBehaviour
     {
         Destroy(mainGameObject);
         Destroy(cursorPositions);
-        Destroy(cursorRender);
     }
+}
+
+public enum StatusCursor
+{
+    cursorNormal = 0,
+    cursorLink2OrAlternative3 = 1,
+    cursorAlternative = 2,
+    cursorTextAlsoCanBeAlternativeSprite = 3,
+    cursorLink = 4,
+
+    hide = 999
 }
