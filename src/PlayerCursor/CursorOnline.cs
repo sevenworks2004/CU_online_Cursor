@@ -17,13 +17,14 @@ public class OnlineCursorProcess : MonoBehaviour
     public static bool visable = true;
     public static void init()
     {
-        initalizerCursorSprite();
+
         SceneManager.activeSceneChanged += (Scene oldScene, Scene newScene) =>
         {
             if (newScene.name == "SampleScene")
             {
                 if (Net.IsRunning && gameObjectProcessor == null)
                 {
+                    initalizerCursorSprite();
                     gameObjectProcessor = new GameObject("CurssorUi_Processor");
                     gameObjectProcessor.AddComponent<OnlineCursorProcess>();
 
@@ -31,6 +32,7 @@ public class OnlineCursorProcess : MonoBehaviour
 #if DEBUG
                 else
                 {
+                    initalizerCursorSprite();
                     PlayerCamera.main.body.gameObject.AddComponent<OnlineCursorUi>().body = PlayerCamera.main.body;
                 }
 #endif
@@ -372,18 +374,21 @@ public class OnlineCursorUi : MonoBehaviour
         {
             if (scavPlayer.playerColor != ScavPlayer.LocalPlayer.playerColor)
             {
-                cursorRender.sprite = null;
+                statusCursor = StatusCursor.hide;
+                updateCursorStatus();
                 return;
             }
         }
         else if (Multiplayer.rules.PVP && !Multiplayer.rules.Teams)
         {
-            cursorRender.sprite = null;
+            statusCursor = StatusCursor.hide;
+            updateCursorStatus();
             return;
         }
         else if (scavPlayer.IsAltTab || scavPlayer.IsDead())
         {
-            cursorRender.sprite = null;
+            statusCursor = StatusCursor.hide;
+            updateCursorStatus();
             return;
         }
 #endif
@@ -403,12 +408,15 @@ public class OnlineCursorUi : MonoBehaviour
             if (collider.TryGetComponent<Item>(out Item item))
             {
                 statusCursor = StatusCursor.cursorLink2OrAlternative3;
+#if DEBUG
                 LoggerCursor.Logger.LogDebug($"Hover item : {item.name}");
-
+#endif
             }
             else if (collider.TryGetComponent<BuildingEntity>(out BuildingEntity building))
             {
+#if DEBUG
                 LoggerCursor.Logger.LogDebug($"Hover BuildingEntity : {building.name}");
+#endif
                 if (building.TryGetComponent<UsableObject>(out UsableObject usableObject))
                 {
                     var posBody = body.transform.position;
@@ -435,7 +443,9 @@ public class OnlineCursorUi : MonoBehaviour
             else if (collider.TryGetComponent<Body>(out Body body))
             {
                 statusCursor = StatusCursor.cursorLink;
+#if DEBUG
                 LoggerCursor.Logger.LogDebug($"Hover Body : {body.name}");
+#endif
 
             }
             else if (collider.TryGetComponent<ChunkScript>(out ChunkScript chunk))
@@ -444,8 +454,9 @@ public class OnlineCursorUi : MonoBehaviour
                 BlockInfo blockInfo = WorldGeneration.world.GetBlockInfo(WorldGeneration.world.worldBlocks[posBlock.x, posBlock.y]);
                 Descriptions(blockInfo.name);
                 statusCursor = StatusCursor.cursorAlternative;
+#if DEBUG
                 LoggerCursor.Logger.LogDebug($"Hover block : {blockInfo.name}");
-
+#endif
             }
             else
             {
