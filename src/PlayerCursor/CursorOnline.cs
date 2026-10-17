@@ -17,7 +17,10 @@ public class OnlineCursorProcess : MonoBehaviour
     public static bool visable = true;
     public static void init()
     {
-
+        if (isIgnorePVPInvsableCursor)
+        {
+            LoggerCursor.Logger.LogInfo("Ignore PVP Cursor Enabel");
+        }
         SceneManager.activeSceneChanged += (Scene oldScene, Scene newScene) =>
         {
             if (newScene.name == "SampleScene")
